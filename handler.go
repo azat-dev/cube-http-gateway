@@ -8,7 +8,6 @@ import (
 	"github.com/akaumov/cube"
 	"github.com/akaumov/cube-http-gateway/js"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"time"
 )
@@ -27,7 +26,7 @@ func (h *Handler) OnInitInstance() []cube.InputChannel {
 }
 
 func (h *Handler) OnStart(c cube.Cube) {
-	log.Println("Starting http server...")
+	fmt.Println("Starting http server...")
 	go h.startHttpServer(c)
 }
 
@@ -35,13 +34,13 @@ func (h *Handler) OnStop(c cube.Cube) {
 }
 
 func (h *Handler) OnReceiveMessage(instance cube.Cube, channel cube.Channel, message cube.Message) {
-	log.Println("OnReceiveMessage: is not implemented")
+	fmt.Println("OnReceiveMessage: is not implemented")
 	instance.LogError("OnReceiveMessage: is not implemented")
 }
 
 //From bus
 func (h *Handler) OnReceiveRequest(instance cube.Cube, channel cube.Channel, request cube.Request) (*cube.Response, error) {
-	log.Println("OnReceiveRequest: is not implemented")
+	fmt.Println("OnReceiveRequest: is not implemented")
 	instance.LogError("OnReceiveRequest: is not implemented")
 	return &cube.Response{
 		Version: Version,
@@ -66,11 +65,11 @@ func (h *Handler) startHttpServer(cubeInstance cube.Cube) {
 
 	h.httpServer = &srv
 
-	log.Println("Start http listening")
+	fmt.Println("Start http listening")
 	cubeInstance.LogInfo("Start http listening")
 	err := srv.ListenAndServe()
 
-	log.Fatal("Stop http listenning", err)
+	fmt.Println("Stop http listenning", err)
 	cubeInstance.LogFatal(err.Error())
 }
 
@@ -162,7 +161,7 @@ func (h *Handler) handleResponse(responseMessage *cube.Response, writer http.Res
 //Request from gateway
 func (h *Handler) handleGatewayRequest(writer http.ResponseWriter, request *http.Request) {
 
-	log.Println("onReceiveRequest", request)
+	fmt.Println("onReceiveRequest", request)
 
 	var userId, deviceId *string
 	var err error
