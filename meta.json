@@ -1,0 +1,31 @@
+{
+  "version": "1",
+  "description": "http gateway",
+  "channels": {
+    "GET": {
+      "direction": "output"
+    },
+    "POST": {
+      "direction": "output"
+    },
+    "DELETE": {
+      "direction": "output"
+    },
+    "PUT": {
+      "direction": "output"
+    },
+    "PATCH": {
+      "direction": "output"
+    }
+  },
+  "params": {
+    "timeout": {
+      "type": "number",
+      "default": 30000
+    },
+    "jwtSecret" : {
+      "type": "string",
+      "description": "secret code for decrypt userId and deviceId fields from auth token"
+    }
+  }
+}

@@ -1,4 +1,4 @@
-package handler
+package cube_http_gateway
 
 import (
 	"encoding/json"
@@ -9,6 +9,7 @@ import (
 	"github.com/akaumov/cube-http-gateway/js"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -17,17 +18,33 @@ const Version = "1"
 type Handler struct {
 	httpServer   *http.Server
 	cubeInstance cube.Cube
+	timeoutMs    uint64
 	jwtSecret    string
-	timeout      time.Duration
 }
 
 func (h *Handler) OnInitInstance() []cube.InputChannel {
 	return []cube.InputChannel{}
 }
 
-func (h *Handler) OnStart(c cube.Cube) {
-	fmt.Println("Starting http server...")
-	go h.startHttpServer(c)
+func (h *Handler) OnStart(cubeInstance cube.Cube) {
+	fmt.Println("Starting http gateway...")
+
+	h.cubeInstance = cubeInstance
+	h.jwtSecret = cubeInstance.GetParam("jwtString")
+
+	h.timeoutMs = 30000
+	timeoutString := cubeInstance.GetParam("timeoutMs")
+
+	if timeoutString != "" {
+		timeoutMs, err := strconv.ParseUint(timeoutString, 10, 64)
+		if err != nil {
+			cubeInstance.LogError("Wrong ")
+		}
+
+		h.timeoutMs = timeoutMs
+	}
+
+	go h.startHttpServer(cubeInstance)
 }
 
 func (h *Handler) OnStop(c cube.Cube) {
@@ -57,10 +74,9 @@ func (h *Handler) OnReceiveRequest(instance cube.Cube, channel cube.Channel, req
 
 func (h *Handler) startHttpServer(cubeInstance cube.Cube) {
 
-	http.HandleFunc("*", h.handleGatewayRequest)
-
 	srv := http.Server{
-		Addr: ":80",
+		Addr:    ":80",
+		Handler: h,
 	}
 
 	h.httpServer = &srv
@@ -96,7 +112,7 @@ func (h *Handler) getAuthData(tokenString string) (*string, *string, error) {
 	return &userId, &deviceId, nil
 }
 
-func (h *Handler) packRequest(userId string, deviceId string, request *http.Request) (*cube.Request, error) {
+func (h *Handler) packRequest(userId *string, deviceId *string, request *http.Request) (*cube.Request, error) {
 	var err error
 	var body []byte
 
@@ -159,7 +175,7 @@ func (h *Handler) handleResponse(responseMessage *cube.Response, writer http.Res
 }
 
 //Request from gateway
-func (h *Handler) handleGatewayRequest(writer http.ResponseWriter, request *http.Request) {
+func (h *Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 
 	fmt.Println("onReceiveRequest", request)
 
@@ -179,7 +195,7 @@ func (h *Handler) handleGatewayRequest(writer http.ResponseWriter, request *http
 		}
 	}
 
-	requestData, err := h.packRequest(*userId, *deviceId, request)
+	requestData, err := h.packRequest(userId, deviceId, request)
 	if err != nil {
 		http.Error(writer,
 			http.StatusText(http.StatusInternalServerError),
@@ -187,8 +203,10 @@ func (h *Handler) handleGatewayRequest(writer http.ResponseWriter, request *http
 		return
 	}
 
-	timeout := time.Duration(h.timeout) * time.Millisecond
-	response, err := h.cubeInstance.CallMethod(cube.Channel(request.Method), *requestData, timeout)
+	timeout := time.Duration(h.timeoutMs) * time.Millisecond
+	cubeChannel := cube.Channel(request.Method)
+
+	response, err := h.cubeInstance.CallMethod(cubeChannel, *requestData, timeout)
 
 	if err != nil {
 		if err == cube.ErrorTimeout {

@@ -7,8 +7,8 @@ type RequestParams struct {
 	RemoteAddr string              `json:"remoteAddr"`
 	RequestURI string              `json:"requestURI"`
 	Body       []byte              `json:"body"`
-	UserId     string              `json:"userId"`
-	DeviceId   string              `json:"deviceId"`
+	UserId     *string             `json:"userId"`
+	DeviceId   *string             `json:"deviceId"`
 	Headers    map[string][]string `json:"headers"`
 }
 
