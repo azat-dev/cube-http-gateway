@@ -181,10 +181,10 @@ func (h *Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 
 	var userId, deviceId *string
 	var err error
-	token := ""
+	token := request.Header.Get("X-Auth-Token")
 
-	if h.jwtSecret != "" {
-		token = request.Header.Get("X-Auth-Token")
+	if token != "" && h.jwtSecret != "" {
+
 		userId, deviceId, err = h.getAuthData(token)
 
 		if err != nil {
