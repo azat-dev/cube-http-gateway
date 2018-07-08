@@ -1,15 +1,16 @@
 package handler
 
 import (
-	"github.com/akaumov/cube"
-	"net/http"
+	"encoding/json"
 	"fmt"
 	"github.com/SermoDigital/jose/crypto"
 	"github.com/SermoDigital/jose/jws"
-	"time"
-	"io/ioutil"
-	"encoding/json"
+	"github.com/akaumov/cube"
 	"github.com/akaumov/cube-http-gateway/js"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"time"
 )
 
 const Version = "1"
@@ -21,20 +22,24 @@ type Handler struct {
 	timeout      time.Duration
 }
 
-func (h *Handler) OnStart(instance cube.Cube) {
-	h.startHttpServer(instance)
+func (h *Handler) OnInitInstance() []cube.InputChannel {
+	return []cube.InputChannel{}
 }
 
-func (h *Handler) OnStop(instance cube.Cube) {
-	panic("implement me")
+func (h *Handler) OnStart(c cube.Cube) {
 }
 
-func (h *Handler) OnReceiveMessage(instance cube.Cube, channel string, message cube.Message) {
+func (h *Handler) OnStop(c cube.Cube) {
+}
+
+func (h *Handler) OnReceiveMessage(instance cube.Cube, channel cube.Channel, message cube.Message) {
+	log.Println("OnReceiveMessage: is not implemented")
 	instance.LogError("OnReceiveMessage: is not implemented")
 }
 
 //From bus
-func (h *Handler) OnReceiveRequest(instance cube.Cube, channel string, request cube.Request) (*cube.Response, error) {
+func (h *Handler) OnReceiveRequest(instance cube.Cube, channel cube.Channel, request cube.Request) (*cube.Response, error) {
+	log.Println("OnReceiveRequest: is not implemented")
 	instance.LogError("OnReceiveRequest: is not implemented")
 	return &cube.Response{
 		Version: Version,
@@ -59,9 +64,11 @@ func (h *Handler) startHttpServer(cubeInstance cube.Cube) {
 
 	h.httpServer = &srv
 
+	log.Println("Start http listening")
 	cubeInstance.LogInfo("Start http listening")
-
 	err := srv.ListenAndServe()
+
+	log.Fatal("Stop http listenning", err)
 	cubeInstance.LogFatal(err.Error())
 }
 
@@ -153,6 +160,8 @@ func (h *Handler) handleResponse(responseMessage *cube.Response, writer http.Res
 //Request from gateway
 func (h *Handler) handleGatewayRequest(writer http.ResponseWriter, request *http.Request) {
 
+	log.Println("onReceiveRequest", request)
+
 	var userId, deviceId *string
 	var err error
 	token := ""
@@ -178,7 +187,7 @@ func (h *Handler) handleGatewayRequest(writer http.ResponseWriter, request *http
 	}
 
 	timeout := time.Duration(h.timeout) * time.Millisecond
-	response, err := h.cubeInstance.CallMethod(request.Method, *requestData, timeout)
+	response, err := h.cubeInstance.CallMethod(cube.Channel(request.Method), *requestData, timeout)
 
 	if err != nil {
 		if err == cube.ErrorTimeout {
