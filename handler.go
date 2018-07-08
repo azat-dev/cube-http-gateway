@@ -60,7 +60,7 @@ func (h *Handler) startHttpServer(cubeInstance cube.Cube) {
 	http.HandleFunc("*", h.handleGatewayRequest)
 
 	srv := http.Server{
-		Addr: "localhost:80",
+		Addr: ":80",
 	}
 
 	h.httpServer = &srv
