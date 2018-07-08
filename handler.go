@@ -27,6 +27,7 @@ func (h *Handler) OnInitInstance() []cube.InputChannel {
 }
 
 func (h *Handler) OnStart(c cube.Cube) {
+	go h.startHttpServer(c)
 }
 
 func (h *Handler) OnStop(c cube.Cube) {
