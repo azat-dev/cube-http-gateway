@@ -24,7 +24,7 @@ func main() {
 			EnvVar: "GATEWAY_BUS_PORT",
 			Usage:  "bus port",
 		},
-		cli.IntFlag{
+		cli.StringFlag{
 			Name:   "jwt-secret",
 			EnvVar: "GATEWAY_JWT_SECRET",
 			Usage:  "jwt secret",
