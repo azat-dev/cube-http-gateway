@@ -2,27 +2,10 @@
 
 
 [[projects]]
-  name = "github.com/SermoDigital/jose"
-  packages = [
-    ".",
-    "crypto",
-    "jws",
-    "jwt"
-  ]
-  revision = "f6df55f235c24f236d11dbcf665249a59ac2021f"
-  version = "1.1"
-
-[[projects]]
   branch = "master"
   name = "github.com/akaumov/cube"
   packages = ["."]
   revision = "70fcbee2bb959a8c485c74af90abc441fa46de2d"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/akaumov/cube_executor"
-  packages = ["."]
-  revision = "478440f762b918cb1c855dec1eff3074d5c9da09"
 
 [[projects]]
   branch = "master"
@@ -52,15 +35,9 @@
   revision = "f58768cc1a7a7e77a3bd49e98cdd21419399b6a3"
   version = "v1.2.0"
 
-[[projects]]
-  name = "github.com/urfave/cli"
-  packages = ["."]
-  revision = "cfb38830724cc34fedffe9a2a29fb54fa9169cd1"
-  version = "v1.20.0"
-
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "29a306f6f950b4d3c63ddec06cc6352eb4a94ff64d7bb946d4d15ce4860d7a18"
+  inputs-digest = "8a55ad7e91f87a79e31dc933121ed31ccdda1dbb44f1447c2f8833c36f4ca89e"
   solver-name = "gps-cdcl"
   solver-version = 1
