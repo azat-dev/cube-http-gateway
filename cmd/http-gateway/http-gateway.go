@@ -35,9 +35,14 @@ func main() {
 			Usage:  "requests timeout ms",
 		},
 		cli.StringFlag{
-			Name: "endpoints-map",
+			Name:   "endpoints-map",
 			EnvVar: "GATEWAY_ENDPOINTS_MAP",
-			Usage: "map url to endpoint",
+			Usage:  "map url to endpoint",
+		},
+		cli.BoolTFlag{
+			Name:   "only-authorized-requests",
+			EnvVar: "GATEWAY_ONLY_AUTHORIZED_REQUESTS",
+			Usage:  "map url to endpoint",
 		},
 	}
 
@@ -46,7 +51,6 @@ func main() {
 		log.Fatal(err)
 	}
 }
-
 
 func runServer(c *cli.Context) error {
 
@@ -68,16 +72,23 @@ func runServer(c *cli.Context) error {
 	timeoutMs := c.String("timeout")
 	endpointsMap := c.String("endpoints-map")
 
+	onlyAuthorizedRequests := "true"
+	if c.Bool("only-authorized-requests") {
+		onlyAuthorizedRequests = "true"
+	} else {
+		onlyAuthorizedRequests = "false"
+	}
+
 	cube, err := cube_executor.NewCube(cube_executor.CubeConfig{
 		BusPort: busPort,
 		BusHost: busHost,
-		Params: map[string]string {
-			"jwtSecret":    jwtSecret,
-			"timeoutMs":    timeoutMs,
-			"endpointsMap": endpointsMap,
+		Params: map[string]string{
+			"jwtSecret":              jwtSecret,
+			"timeoutMs":              timeoutMs,
+			"endpointsMap":           endpointsMap,
+			"onlyAuthorizedRequests": onlyAuthorizedRequests,
 		},
 	}, cube_http_gateway.Handler{})
-
 
 	if err != nil {
 		return fmt.Errorf("can't start: %v", err)

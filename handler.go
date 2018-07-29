@@ -20,11 +20,12 @@ type BusSubject string
 type Uri string
 
 type Handler struct {
-	httpServer   *http.Server
-	cubeInstance cube.Cube
-	timeoutMs    uint64
-	jwtSecret    string
-	endpointsMap map[Uri]BusSubject
+	httpServer             *http.Server
+	cubeInstance           cube.Cube
+	timeoutMs              uint64
+	onlyAuthorizedRequests bool
+	jwtSecret              string
+	endpointsMap           map[Uri]BusSubject
 }
 
 func parseEndpointsMap(rawMap string) (*map[Uri]BusSubject, error) {
@@ -59,6 +60,7 @@ func (h Handler) OnStart(cubeInstance cube.Cube) error {
 
 	h.cubeInstance = cubeInstance
 	h.jwtSecret = cubeInstance.GetParam("jwtString")
+	h.onlyAuthorizedRequests = cubeInstance.GetParam("onlyAuthorizedRequests") == "true"
 
 	h.timeoutMs = 30000
 	timeoutString := cubeInstance.GetParam("timeoutMs")
@@ -228,6 +230,13 @@ func (h Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 				http.StatusUnauthorized)
 			return
 		}
+	}
+
+	if h.onlyAuthorizedRequests && userId == nil {
+		http.Error(writer,
+			http.StatusText(http.StatusUnauthorized),
+			http.StatusUnauthorized)
+		return
 	}
 
 	requestData, err := h.packRequest(userId, deviceId, request)
