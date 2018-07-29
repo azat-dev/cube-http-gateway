@@ -61,7 +61,7 @@ func (h Handler) OnStart(cubeInstance cube.Cube) error {
 	fmt.Println("Starting http gateway...")
 
 	h.cubeInstance = cubeInstance
-	h.jwtSecret = cubeInstance.GetParam("jwtString")
+	h.jwtSecret = cubeInstance.GetParam("jwtSecret")
 	h.onlyAuthorizedRequests = cubeInstance.GetParam("onlyAuthorizedRequests") == "true"
 	h.devMode = cubeInstance.GetParam("dev") == "true"
 
@@ -161,7 +161,7 @@ func (h Handler) getAuthData(tokenString string) (*string, *string, error) {
 		return nil, nil, err
 	}
 
-	err = newToken.Validate([]byte(h.jwtSecret), crypto.SigningMethodHS256)
+	err = newToken.Validate([]byte(h.jwtSecret), crypto.SigningMethodHS512)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -254,7 +254,7 @@ func (h Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 		fmt.Println("RECEIVE REQUEST:")
 		fmt.Println("method: ", request.Method)
 		fmt.Println("url: ", request.URL)
-		fmt.Println("uri: ", request.RequestURI)
+		fmt.Println("headers: ", request.Header)
 		fmt.Println("body:")
 		fmt.Println(request.Body)
 		fmt.Println("-----")
