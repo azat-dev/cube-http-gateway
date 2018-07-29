@@ -42,7 +42,17 @@ func main() {
 		cli.BoolTFlag{
 			Name:   "only-authorized-requests",
 			EnvVar: "GATEWAY_ONLY_AUTHORIZED_REQUESTS",
-			Usage:  "map url to endpoint",
+			Usage:  "handle only authorized requests",
+		},
+		cli.BoolFlag{
+			Name:   "dev",
+			EnvVar: "GATEWAY_DEV",
+			Usage:  "log all requests",
+		},
+		cli.StringFlag{
+			Name:   "port",
+			EnvVar: "GATEWAY_PORT",
+			Usage:  "port to listen",
 		},
 	}
 
@@ -70,6 +80,7 @@ func runServer(c *cli.Context) error {
 	}
 
 	timeoutMs := c.String("timeout")
+	port := c.String("port")
 	endpointsMap := c.String("endpoints-map")
 
 	onlyAuthorizedRequests := "true"
@@ -77,6 +88,13 @@ func runServer(c *cli.Context) error {
 		onlyAuthorizedRequests = "true"
 	} else {
 		onlyAuthorizedRequests = "false"
+	}
+
+	dev := "false"
+	if c.Bool("dev") {
+		dev = "true"
+	} else {
+		dev = "false"
 	}
 
 	cube, err := cube_executor.NewCube(cube_executor.CubeConfig{
@@ -87,6 +105,8 @@ func runServer(c *cli.Context) error {
 			"timeoutMs":              timeoutMs,
 			"endpointsMap":           endpointsMap,
 			"onlyAuthorizedRequests": onlyAuthorizedRequests,
+			"dev": dev,
+			"port": port,
 		},
 	}, cube_http_gateway.Handler{})
 

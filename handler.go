@@ -26,6 +26,8 @@ type Handler struct {
 	onlyAuthorizedRequests bool
 	jwtSecret              string
 	endpointsMap           map[Uri]BusSubject
+	devMode                bool
+	port                   int
 }
 
 func parseEndpointsMap(rawMap string) (*map[Uri]BusSubject, error) {
@@ -61,6 +63,22 @@ func (h Handler) OnStart(cubeInstance cube.Cube) error {
 	h.cubeInstance = cubeInstance
 	h.jwtSecret = cubeInstance.GetParam("jwtString")
 	h.onlyAuthorizedRequests = cubeInstance.GetParam("onlyAuthorizedRequests") == "true"
+	h.devMode = cubeInstance.GetParam("dev") == "true"
+
+	portString := cubeInstance.GetParam("port")
+
+	var err error
+	port := 80
+
+	if portString != "" {
+		port, err = strconv.Atoi(portString)
+		if err != nil {
+			cubeInstance.LogError("Wrong timeout")
+			return err
+		}
+	}
+
+	h.port = port
 
 	h.timeoutMs = 30000
 	timeoutString := cubeInstance.GetParam("timeoutMs")
@@ -68,7 +86,7 @@ func (h Handler) OnStart(cubeInstance cube.Cube) error {
 	if timeoutString != "" {
 		timeoutMs, err := strconv.ParseUint(timeoutString, 10, 64)
 		if err != nil {
-			cubeInstance.LogError("Wrong ")
+			cubeInstance.LogError("Wrong timeout")
 			return err
 		}
 
@@ -122,7 +140,11 @@ func (h Handler) startHttpServer(cubeInstance cube.Cube) {
 
 	fmt.Println("Start http listening")
 	cubeInstance.LogInfo("Start http listening")
-	err := srv.ListenAndServe()
+
+	address := fmt.Sprintf(":%v", h.port)
+
+	http.HandleFunc("/", h.ServeHTTP)
+	err := http.ListenAndServe(address, nil)
 
 	fmt.Println("Stop http listenning", err)
 	cubeInstance.LogFatal(err.Error())
@@ -205,6 +227,16 @@ func (h Handler) handleResponse(responseMessage *cube.Response, writer http.Resp
 		return err
 	}
 
+	if h.devMode {
+		fmt.Println("")
+		fmt.Println("-----")
+		fmt.Println("RESPONSE:")
+		fmt.Println("status: ", response.Status)
+		fmt.Println("body:")
+		fmt.Println(response.Body)
+		fmt.Println("-----")
+	}
+
 	writer.WriteHeader(int(response.Status))
 	if response.Body != nil && len(response.Body) > 0 {
 		writer.Write(response.Body)
@@ -216,9 +248,22 @@ func (h Handler) handleResponse(responseMessage *cube.Response, writer http.Resp
 //Request from gateway
 func (h Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 
+	if h.devMode {
+		fmt.Println("")
+		fmt.Println("-----")
+		fmt.Println("RECEIVE REQUEST:")
+		fmt.Println("method: ", request.Method)
+		fmt.Println("url: ", request.URL)
+		fmt.Println("uri: ", request.RequestURI)
+		fmt.Println("body:")
+		fmt.Println(request.Body)
+		fmt.Println("-----")
+	}
+
 	var userId, deviceId *string
 	var err error
-	token := request.Header.Get("X-Auth-Token")
+	token := request.Header.Get("Authorization")
+	token = strings.TrimPrefix(token, "Bearer ")
 
 	if token != "" && h.jwtSecret != "" {
 
@@ -261,8 +306,18 @@ func (h Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 		}
 	}
 
-	response, err := h.cubeInstance.CallMethod(cubeChannel, *requestData, timeout)
+	if h.devMode {
+		fmt.Println("")
+		fmt.Println("-----")
+		fmt.Println("ROUTE REQUEST:")
+		fmt.Println("channel: ", cubeChannel)
+		fmt.Println("packed request: ")
+		data, _ := json.Marshal(requestData)
+		fmt.Println(string(data))
+		fmt.Println("-----")
+	}
 
+	response, err := h.cubeInstance.CallMethod(cubeChannel, *requestData, timeout)
 	if err != nil {
 		if err == cube.ErrorTimeout {
 			http.Error(writer,
