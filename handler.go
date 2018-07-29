@@ -254,6 +254,7 @@ func (h Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 		fmt.Println("RECEIVE REQUEST:")
 		fmt.Println("method: ", request.Method)
 		fmt.Println("url: ", request.URL)
+		fmt.Println("uri: ", request.RequestURI)
 		fmt.Println("headers: ", request.Header)
 		fmt.Println("body:")
 		fmt.Println(request.Body)
