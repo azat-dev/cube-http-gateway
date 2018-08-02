@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/akaumov/cube_executor"
+	"github.com/akaumov/cube-executor"
 	"flag"
 	"log"
 	"io/ioutil"

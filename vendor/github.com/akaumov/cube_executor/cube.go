@@ -291,15 +291,41 @@ func (c *Cube) startListenMessagesFromBus(inputChannel BusChannel, stopChannel c
 }
 
 func (c *Cube) handleNatsMessage(msg *nats.Msg) {
-	var message cube_interface.Message
 
-	err := json.Unmarshal(msg.Data, message)
+	cubeChannel := c.mapToCubeChannel(BusChannel(msg.Subject))
+
+	if msg.Reply != "" {
+		var message cube_interface.Message
+		err := json.Unmarshal(msg.Data, message)
+		if err == nil {
+			return
+		}
+
+		c.handler.OnReceiveMessage(c, cube_interface.Channel(cubeChannel), message)
+	}
+
+	var request cube_interface.Request
+	err := json.Unmarshal(msg.Data, request)
 	if err == nil {
 		return
 	}
 
-	cubeChannel := c.mapToCubeChannel(BusChannel(msg.Subject))
-	c.handler.OnReceiveMessage(c, cube_interface.Channel(cubeChannel), message)
+	response := c.handler.OnReceiveRequest(c, cube_interface.Channel(cubeChannel), request)
+	client, err := c.pool.Get()
+	defer func() {c.pool.Put(client)}()
+
+	if err != nil {
+		log.Println("Get bus client error ", err)
+		return
+	}
+
+	packedResponse, err := json.Marshal(response)
+	if err != nil {
+		log.Println("Can't pack request response ", err)
+		return
+	}
+
+	err = client.Publish(msg.Reply, packedResponse)
 }
 
 func (c *Cube) Start() error {
@@ -310,7 +336,7 @@ func (c *Cube) Start() error {
 
 	pool, err := nats_pool.New(c.busAddress, 10)
 	if err != nil {
-		return  fmt.Errorf("can't connect to nats: %v", err)
+		return fmt.Errorf("can't connect to nats: %v", err)
 	}
 
 	c.pool = pool
