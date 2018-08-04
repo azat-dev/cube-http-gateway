@@ -209,8 +209,7 @@ func (c *Cube) sendLogMessage(level string, text string) error {
 	packedLogMessage, _ := json.Marshal(logMessage)
 
 	message := cube_interface.Message{
-		Id:      &id,
-		Version: Version,
+		Id:      id,
 		Method:  level,
 		Params:  (*json.RawMessage)(&packedLogMessage),
 	}

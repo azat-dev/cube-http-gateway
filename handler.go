@@ -113,20 +113,14 @@ func (h Handler) OnReceiveMessage(instance cube.Cube, channel cube.Channel, mess
 }
 
 //From bus
-func (h Handler) OnReceiveRequest(instance cube.Cube, channel cube.Channel, request cube.Request) (*cube.Response, error) {
+func (h Handler) OnReceiveRequest(instance cube.Cube, channel cube.Channel, request cube.Request) cube.Response {
 	fmt.Println("OnReceiveRequest: is not implemented")
 	instance.LogError("OnReceiveRequest: is not implemented")
-	return &cube.Response{
-		Version: Version,
-		Result:  nil,
-		Errors: &[]cube.Error{
-			{
-				Code:        "400",
-				Name:        "NotImplemented",
-				Description: "OnReceiveRequest: is not implemented",
-			},
-		},
-	}, nil
+	return cube.NewErrorResponse(
+		"",
+		"NotImplemented",
+		"",
+	)
 }
 
 func (h Handler) startHttpServer(cubeInstance cube.Cube) {
@@ -210,9 +204,8 @@ func (h Handler) packRequest(userId *string, deviceId *string, request *http.Req
 	packedParams, err := json.Marshal(params)
 
 	requestData := &cube.Request{
-		Version: "1",
-		Method:  request.Method,
-		Params:  (*json.RawMessage)(&packedParams),
+		Method: request.Method,
+		Params: (*json.RawMessage)(&packedParams),
 	}
 
 	return requestData, nil

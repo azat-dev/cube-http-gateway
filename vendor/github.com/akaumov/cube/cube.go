@@ -11,29 +11,44 @@ var (
 )
 
 type Message struct {
-	Version string           `json:"version"`
-	Id      *string          `json:"id"`
-	Method  string           `json:"method"`
-	Params  *json.RawMessage `json:"params"`
-}
-
-type Error struct {
-	Code        string           `json:"code"`
-	Name        string           `json:"name"`
-	Description string           `json:"description"`
-	Data        *json.RawMessage `json:"data"`
+	Id     string           `json:"id"`
+	Method string           `json:"method"`
+	Params *json.RawMessage `json:"params"`
 }
 
 type Request struct {
-	Version string           `json:"version"`
-	Method  string           `json:"method"`
-	Params  *json.RawMessage `json:"params"`
+	Method string           `json:"method"`
+	Params *json.RawMessage `json:"params"`
 }
 
 type Response struct {
-	Version string           `json:"version"`
-	Result  *json.RawMessage `json:"result"`
-	Errors  *[]Error         `json:"errors"`
+	Id     string           `json:"id"`
+	Result *json.RawMessage `json:"result"`
+	Error  *Error           `json:"error"`
+}
+
+type Error struct {
+	Name    string `json:"name"`
+	Message string `json:"description"`
+}
+
+func NewResultResponse(requestId string, result *json.RawMessage) Response {
+	return Response{
+		Id:     requestId,
+		Result: result,
+		Error:  nil,
+	}
+}
+
+func NewErrorResponse(requestId string, name string, message string) Response {
+	return Response{
+		Id:     requestId,
+		Result: nil,
+		Error: &Error{
+			Name:    name,
+			Message: message,
+		},
+	}
 }
 
 type Channel string

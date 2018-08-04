@@ -16,13 +16,13 @@
   branch = "master"
   name = "github.com/akaumov/cube"
   packages = ["."]
-  revision = "79cd16abcb3fee1623d6fe10e8525bd482706572"
+  revision = "d43007b9abca2fef7075644f54a9b624d8d7d5a6"
 
 [[projects]]
   branch = "master"
-  name = "github.com/akaumov/cube_executor"
+  name = "github.com/akaumov/cube-executor"
   packages = ["."]
-  revision = "7dbb2442184dbb5c1f57621cb07ec27cfdb4fd81"
+  revision = "25786a6b1f4ab5cecb9283edcbe9def938857ce2"
 
 [[projects]]
   branch = "master"
@@ -61,6 +61,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "29a306f6f950b4d3c63ddec06cc6352eb4a94ff64d7bb946d4d15ce4860d7a18"
+  inputs-digest = "efee13422e93743b89fd06522c0c796c816c8d9e9ab7b3eae05b1b92b5870d20"
   solver-name = "gps-cdcl"
   solver-version = 1
