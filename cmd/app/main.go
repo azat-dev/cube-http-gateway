@@ -11,7 +11,7 @@ import (
 
 func main() {
 	app := cli.NewApp()
-	app.Version = "0.0.2"
+	app.Version = "0.0.4"
 	app.Action = runServer
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
@@ -105,10 +105,10 @@ func runServer(c *cli.Context) error {
 			"timeoutMs":              timeoutMs,
 			"endpointsMap":           endpointsMap,
 			"onlyAuthorizedRequests": onlyAuthorizedRequests,
-			"dev": dev,
-			"port": port,
+			"dev":                    dev,
+			"port":                   port,
 		},
-	}, cube_http_gateway.Handler{})
+	}, &cube_http_gateway.Handler{})
 
 	if err != nil {
 		return fmt.Errorf("can't start: %v", err)

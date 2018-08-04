@@ -53,11 +53,11 @@ func parseEndpointsMap(rawMap string) (*map[Uri]BusSubject, error) {
 	return &params, nil
 }
 
-func (h Handler) OnInitInstance() []cube.InputChannel {
+func (h *Handler) OnInitInstance() []cube.InputChannel {
 	return []cube.InputChannel{}
 }
 
-func (h Handler) OnStart(cubeInstance cube.Cube) error {
+func (h *Handler) OnStart(cubeInstance cube.Cube) error {
 	fmt.Println("Starting http gateway...")
 
 	h.cubeInstance = cubeInstance
@@ -104,16 +104,16 @@ func (h Handler) OnStart(cubeInstance cube.Cube) error {
 	return nil
 }
 
-func (h Handler) OnStop(c cube.Cube) {
+func (h *Handler) OnStop(c cube.Cube) {
 }
 
-func (h Handler) OnReceiveMessage(instance cube.Cube, channel cube.Channel, message cube.Message) {
+func (h *Handler) OnReceiveMessage(instance cube.Cube, channel cube.Channel, message cube.Message) {
 	fmt.Println("OnReceiveMessage: is not implemented")
 	instance.LogError("OnReceiveMessage: is not implemented")
 }
 
 //From bus
-func (h Handler) OnReceiveRequest(instance cube.Cube, channel cube.Channel, request cube.Request) cube.Response {
+func (h *Handler) OnReceiveRequest(instance cube.Cube, channel cube.Channel, request cube.Request) cube.Response {
 	fmt.Println("OnReceiveRequest: is not implemented")
 	instance.LogError("OnReceiveRequest: is not implemented")
 	return cube.NewErrorResponse(
@@ -123,7 +123,7 @@ func (h Handler) OnReceiveRequest(instance cube.Cube, channel cube.Channel, requ
 	)
 }
 
-func (h Handler) startHttpServer(cubeInstance cube.Cube) {
+func (h *Handler) startHttpServer(cubeInstance cube.Cube) {
 
 	srv := http.Server{
 		Addr:    ":80",
@@ -144,7 +144,7 @@ func (h Handler) startHttpServer(cubeInstance cube.Cube) {
 	cubeInstance.LogFatal(err.Error())
 }
 
-func (h Handler) getAuthData(tokenString string) (*string, *string, error) {
+func (h *Handler) getAuthData(tokenString string) (*string, *string, error) {
 
 	if tokenString == "" {
 		return nil, nil, fmt.Errorf("empty token")
@@ -167,7 +167,7 @@ func (h Handler) getAuthData(tokenString string) (*string, *string, error) {
 	return &userId, &deviceId, nil
 }
 
-func (h Handler) packRequest(userId *string, deviceId *string, request *http.Request) (*cube.Request, error) {
+func (h *Handler) packRequest(userId *string, deviceId *string, request *http.Request) (*cube.Request, error) {
 	var err error
 	var body []byte
 
@@ -211,7 +211,7 @@ func (h Handler) packRequest(userId *string, deviceId *string, request *http.Req
 	return requestData, nil
 }
 
-func (h Handler) handleResponse(responseMessage *cube.Response, writer http.ResponseWriter) error {
+func (h *Handler) handleResponse(responseMessage *cube.Response, writer http.ResponseWriter) error {
 
 	var response js.Response
 
@@ -239,7 +239,7 @@ func (h Handler) handleResponse(responseMessage *cube.Response, writer http.Resp
 }
 
 //Request from gateway
-func (h Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
+func (h *Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 
 	if h.devMode {
 		fmt.Println("")
