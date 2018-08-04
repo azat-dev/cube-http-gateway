@@ -293,9 +293,9 @@ func (c *Cube) handleNatsMessage(msg *nats.Msg) {
 
 	cubeChannel := c.mapToCubeChannel(BusChannel(msg.Subject))
 
-	if msg.Reply != "" {
+	if msg.Reply == "" {
 		var message cube_interface.Message
-		err := json.Unmarshal(msg.Data, message)
+		err := json.Unmarshal(msg.Data, &message)
 		if err == nil {
 			return
 		}
@@ -304,7 +304,7 @@ func (c *Cube) handleNatsMessage(msg *nats.Msg) {
 	}
 
 	var request cube_interface.Request
-	err := json.Unmarshal(msg.Data, request)
+	err := json.Unmarshal(msg.Data, &request)
 	if err == nil {
 		return
 	}
