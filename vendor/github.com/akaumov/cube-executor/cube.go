@@ -170,8 +170,6 @@ func (c *Cube) CallMethod(cubeChannel cube_interface.Channel, request cube_inter
 		return nil, err
 	}
 
-	fmt.Printf("Call method on channel %v/n", busChannel)
-
 	packedResponse, err := connection.Request(string(busChannel), encodedMessage, timeout)
 	if err == nats.ErrTimeout {
 		return nil, cube_interface.ErrorTimeout
@@ -296,7 +294,7 @@ func (c *Cube) handleNatsMessage(msg *nats.Msg) {
 	if msg.Reply == "" {
 		var message cube_interface.Message
 		err := json.Unmarshal(msg.Data, &message)
-		if err == nil {
+		if err != nil {
 			return
 		}
 
@@ -305,7 +303,7 @@ func (c *Cube) handleNatsMessage(msg *nats.Msg) {
 
 	var request cube_interface.Request
 	err := json.Unmarshal(msg.Data, &request)
-	if err == nil {
+	if err != nil {
 		return
 	}
 
