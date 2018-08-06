@@ -207,9 +207,9 @@ func (c *Cube) sendLogMessage(level string, text string) error {
 	packedLogMessage, _ := json.Marshal(logMessage)
 
 	message := cube_interface.Message{
-		Id:      id,
-		Method:  level,
-		Params:  (*json.RawMessage)(&packedLogMessage),
+		Id:     id,
+		Method: level,
+		Params: (*json.RawMessage)(&packedLogMessage),
 	}
 
 	connection, err := c.pool.Get()
@@ -299,6 +299,7 @@ func (c *Cube) handleNatsMessage(msg *nats.Msg) {
 		}
 
 		c.handler.OnReceiveMessage(c, cube_interface.Channel(cubeChannel), message)
+		return
 	}
 
 	var request cube_interface.Request
@@ -309,7 +310,7 @@ func (c *Cube) handleNatsMessage(msg *nats.Msg) {
 
 	response := c.handler.OnReceiveRequest(c, cube_interface.Channel(cubeChannel), request)
 	client, err := c.pool.Get()
-	defer func() {c.pool.Put(client)}()
+	defer func() { c.pool.Put(client) }()
 
 	if err != nil {
 		log.Println("Get bus client error ", err)

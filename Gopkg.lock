@@ -22,7 +22,7 @@
   branch = "master"
   name = "github.com/akaumov/cube-executor"
   packages = ["."]
-  revision = "a3905d3caa40ac1f819b11de6982c1af9b1bd82c"
+  revision = "30ea37037e870d6e35a87d94155972b2649bfda1"
 
 [[projects]]
   branch = "master"

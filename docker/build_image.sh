@@ -2,7 +2,7 @@
 set -e
 
 IMAGE_NAME=azatk/cube-http-gateway
-IMAGE_VERSION=0.0.4
+IMAGE_VERSION=0.0.5
 
 DIR_RELATIVE_PATH="$( dirname "$( which "$0" )" )"
 DIR_ABSOLUTE_PATH="$(pwd)/$(basename "$DIR_RELATIVE_PATH")"

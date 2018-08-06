@@ -226,7 +226,7 @@ func (h *Handler) handleResponse(responseMessage *cube.Response, writer http.Res
 		fmt.Println("RESPONSE:")
 		fmt.Println("status: ", response.Status)
 		fmt.Println("body:")
-		fmt.Println(response.Body)
+		fmt.Println(string(response.Body))
 		fmt.Println("-----")
 	}
 
@@ -324,6 +324,16 @@ func (h *Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 			http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)
 		return
+	}
+
+	if h.devMode {
+		fmt.Println("")
+		fmt.Println("-----")
+		fmt.Println("RESPONSE:")
+		fmt.Println("packed response: ")
+		data, _ := json.Marshal(response)
+		fmt.Println(string(data))
+		fmt.Println("-----")
 	}
 
 	h.handleResponse(response, writer)
