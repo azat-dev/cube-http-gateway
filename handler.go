@@ -231,6 +231,10 @@ func (h *Handler) handleResponse(responseMessage *cube.Response, writer http.Res
 	}
 
 	writer.WriteHeader(int(response.Status))
+	for key, value := range response.Headers {
+		writer.Header().Set(key, value)
+	}
+
 	if response.Body != nil && len(response.Body) > 0 {
 		writer.Write(response.Body)
 	}

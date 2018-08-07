@@ -13,6 +13,7 @@ type RequestParams struct {
 }
 
 type Response struct {
-	Status int64  `json:"status"`
-	Body   []byte `json:"body"`
+	Status  int64             `json:"status"`
+	Headers map[string]string `json:"headers"`
+	Body    []byte            `json:"body"`
 }
