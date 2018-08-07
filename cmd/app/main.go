@@ -11,7 +11,7 @@ import (
 
 func main() {
 	app := cli.NewApp()
-	app.Version = "0.0.6"
+	app.Version = "0.0.8"
 	app.Action = runServer
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
