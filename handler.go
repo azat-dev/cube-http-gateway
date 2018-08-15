@@ -215,6 +215,21 @@ func (h *Handler) handleResponse(responseMessage *cube.Response, writer http.Res
 
 	var response js.Response
 
+	if responseMessage.Error != nil {
+		if h.devMode {
+			fmt.Println("")
+			fmt.Println("-----")
+			fmt.Println("RESPONSE:")
+			fmt.Println("status: ", response.Status)
+			fmt.Println("body:")
+			fmt.Println(string(response.Body))
+			fmt.Println("-----")
+		}
+
+		writer.Write([]byte(responseMessage.Error.Name))
+		return nil
+	}
+
 	err := json.Unmarshal(*responseMessage.Result, &response)
 	if err != nil {
 		return err
@@ -341,7 +356,7 @@ func (h *Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 		fmt.Println("-----")
 	}
 
-	h.handleResponse(response, writer)
+	err = h.handleResponse(response, writer)
 	if err != nil {
 		http.Error(writer,
 			http.StatusText(http.StatusInternalServerError),
